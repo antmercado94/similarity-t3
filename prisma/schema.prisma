@@ -1,0 +1,34 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model ApiKey {
+  id      String  @id @default(cuid())
+  key     String  @unique
+  enabled Boolean @default(true)
+  userId  String
+  requests ApiRequest[]
+  @@unique([userId, key, enabled]) 
+}
+
+model ApiRequest {
+  id        String   @id @default(cuid())
+  timestamp DateTime @default(now())
+  method    String
+  path      String
+  status    Int
+  duration  Int
+  usedApiKey String
+  ApiKey   ApiKey @relation(fields: [apiKeyId], references: [id])
+  apiKeyId String
+  @@index([apiKeyId, timestamp]) 
+}
